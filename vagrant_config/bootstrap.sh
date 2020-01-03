@@ -105,6 +105,10 @@ VHOST=$(cat <<EOF
                 <Directory /usr/lib/cgi-bin>
                                 SSLOptions +StdEnvVars
                 </Directory>
+                <Directory "/var/www/html/$PROJECTNAME">
+                    AllowOverride All
+                    Require all granted
+                </Directory>
 
         </VirtualHost>
 </IfModule>
