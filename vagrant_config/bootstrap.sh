@@ -84,6 +84,30 @@ VHOST=$(cat <<EOF
         Require all granted
     </Directory>
 </VirtualHost>
+<IfModule mod_ssl.c>
+        <VirtualHost *:443>
+                ServerAdmin your_email@example.com
+                ServerName server_domain_or_IP
+
+                DocumentRoot /var/www/html
+
+                ErrorLog ${APACHE_LOG_DIR}/error.log
+                CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+                SSLEngine on
+
+                SSLCertificateFile      /var/www/html/apache-selfsigned.crt
+                SSLCertificateKeyFile /var/www/html/apache-selfsigned.key
+
+                <FilesMatch "\.(cgi|shtml|phtml|php)$">
+                                SSLOptions +StdEnvVars
+                </FilesMatch>
+                <Directory /usr/lib/cgi-bin>
+                                SSLOptions +StdEnvVars
+                </Directory>
+
+        </VirtualHost>
+</IfModule>
 EOF
 )
 echo "${VHOST}" > /etc/apache2/sites-available/000-default.conf
@@ -101,6 +125,8 @@ echo "$PRIORITYTYPE" > /etc/apache2/mods-available/dir.conf
 
 # enable mod_rewrite
 sudo a2enmod rewrite
+sudo a2enmod ssl
+sudo a2enmod headers
 
 sudo sed -i "s/;extension=pdo_sqlite/extension=pdo_sqlite/" "/etc/php/7.2/apache2/php.ini"
 sudo sed -i "s/;extension=soap/extension=soap/" "/etc/php/7.2/apache2/php.ini"

@@ -12,6 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # se exponen los puertos que se van a utilizar en el desarrollo.
   # - puerto 80 en la VM y se expone en el 8080 en el host
   config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 443, host: 443
   # - puerto 3306 en la VM y se expone en el 6565 en el host
   config.vm.network "forwarded_port", guest: 3306, host: 6565
 
