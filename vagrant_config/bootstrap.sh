@@ -7,7 +7,6 @@ DB_USER='db_user'
 DB_PASSWORD='db_pass'
 PROJECTNAME="gcrisk"
 COMPOSERINSTALLFOLDER="/gc_risk_mini"
-
 # Solo sirve para conectarse por medio de phpmyadmin
 PASSWORD='root_pass'
 
@@ -16,10 +15,11 @@ INSTALL_PHPMYADMIN="false"
 INSTALL_MYSQL="true"
 INSTALL_COMPOSER="true"
 INSTALL_XDEBUG="true"
+DO_COMPOSER_INSTALL="true"
 
 
-
-sudo touch /home/vagrant/log_install
+sudo rm -f /etc/localtime
+sudo ln -sf /usr/share/zoneinfo/America/Bogota /etc/localtime
 
 # configuraciones de paquetes del servidor
 # <----------
@@ -47,8 +47,8 @@ fi
 echo "Instalando php..."
 sudo apt-get -y -q install php
 
-echo "Instalando dependencias de php (mysql,soap,sqlite3)..."
-sudo apt-get -y -q install php-{mysql,soap,sqlite3}
+echo "Instalando dependencias de php (mysql,soap,sqlite3,curl,etc)..."
+sudo apt-get -y -q install php-{mysql,soap,sqlite3,curl,gd,mbstring,dba,intl,odbc,zip}
 
 if [ $INSTALL_PHPMYADMIN = "true" ]
 then
@@ -75,6 +75,8 @@ fi
 
 echo "Configurando apache..."
 # <<<<<------------------------- APACHE
+sudo cp /var/www/html/apache-selfsigned.crt /etc/ssl/certs/
+sudo cp /var/www/html/apache-selfsigned.key /etc/ssl/private/
 # configuracion del vhost apache
 VHOST=$(cat <<EOF
 <VirtualHost *:80>
@@ -89,15 +91,15 @@ VHOST=$(cat <<EOF
                 ServerAdmin your_email@example.com
                 ServerName server_domain_or_IP
 
-                DocumentRoot /var/www/html
+                DocumentRoot /var/www/html/$PROJECTNAME
 
                 ErrorLog ${APACHE_LOG_DIR}/error.log
                 CustomLog ${APACHE_LOG_DIR}/access.log combined
 
                 SSLEngine on
 
-                SSLCertificateFile      /var/www/html/apache-selfsigned.crt
-                SSLCertificateKeyFile /var/www/html/apache-selfsigned.key
+                SSLCertificateFile      /etc/ssl/certs/apache-selfsigned.crt
+                SSLCertificateKeyFile /etc/ssl/private/apache-selfsigned.key
 
                 <FilesMatch "\.(cgi|shtml|phtml|php)$">
                                 SSLOptions +StdEnvVars
@@ -134,6 +136,9 @@ sudo a2enmod headers
 
 sudo sed -i "s/;extension=pdo_sqlite/extension=pdo_sqlite/" "/etc/php/7.2/apache2/php.ini"
 sudo sed -i "s/;extension=soap/extension=soap/" "/etc/php/7.2/apache2/php.ini"
+sudo sed -i "s/;extension=mbstring/extension=mbstring/" "/etc/php/7.2/apache2/php.ini"
+sudo sed -i "s/;extension=exif/extension=exif/" "/etc/php/7.2/apache2/php.ini"
+sudo sed -i "s/;extension=intl/extension=intl/" "/etc/php/7.2/apache2/php.ini"
 sudo sed -i "s/;extension=sqlite3/extension=sqlite3/" "/etc/php/7.2/apache2/php.ini"
 sudo sed -i "s/upload_max_filesize = 2M/upload_max_filesize = 750M/" "/etc/php/7.2/apache2/php.ini"
 sudo sed -i "s/post_max_size = 8M/post_max_size = 250M/" "/etc/php/7.2/apache2/php.ini"
@@ -142,10 +147,10 @@ sudo sed -i "s/memory_limit = 128M/memory_limit = 500M/" "/etc/php/7.2/apache2/p
 
 
 sudo mv /etc/php/7.2/mods-available/sockets.ini /etc/php/7.2/mods-available/__sockets.ini__
-sudo mv /etc/php/7.2/mods-available/calendar.ini /etc/php/7.2/mods-available/__calendar.ini__
+# sudo mv /etc/php/7.2/mods-available/calendar.ini /etc/php/7.2/mods-available/__calendar.ini__
 sudo mv /etc/php/7.2/mods-available/exif.ini /etc/php/7.2/mods-available/__exif.ini__
 sudo mv /etc/php/7.2/mods-available/ftp.ini /etc/php/7.2/mods-available/__ftp.ini__
-sudo mv /etc/php/7.2/mods-available/mysqli.ini /etc/php/7.2/mods-available/__mysqli.ini__
+# sudo mv /etc/php/7.2/mods-available/mysqli.ini /etc/php/7.2/mods-available/__mysqli.ini__
 sudo mv /etc/php/7.2/mods-available/readline.ini /etc/php/7.2/mods-available/__readline.ini__
 sudo mv /etc/php/7.2/mods-available/shmop.ini /etc/php/7.2/mods-available/__shmop.ini__
 sudo mv /etc/php/7.2/mods-available/sysvmsg.ini /etc/php/7.2/mods-available/__sysvmsg.ini__
@@ -218,7 +223,7 @@ then
 fi
 
 
-if [ $INSTALL_COMPOSER = "true" ]
+if [ $DO_COMPOSER_INSTALL = "true" ]
 then
     echo "Instalado dependencias composer..."
     # entra a la carpeta y ejecuta composer
