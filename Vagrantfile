@@ -27,6 +27,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider "virtualbox" do |v|
     v.memory = 2024
     v.cpus = 2
+    v.name = "gcrisk"
   end
+
+  # config.vm.provider "vmware_desktop" do |v|
+  #   v.vmx["custom-key"]  = "value"
+  #   v.vmx["another-key"] = nil
+  # end
 
 end
