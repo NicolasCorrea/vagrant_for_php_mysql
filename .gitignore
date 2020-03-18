@@ -1,3 +1,4 @@
 .vagrant/
 dbbackup/*
 *console.log
+gcrisk/

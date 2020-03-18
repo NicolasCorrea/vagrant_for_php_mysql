@@ -218,8 +218,8 @@ then
     sudo ./configure --with-x=no
     sudo make
 
-    sudo mv /home/vagrant/R-3.5.1/bin/R /usr/local/bin/R
-    sudo mv /home/vagrant/R-3.5.1/bin/Rscript /usr/local/bin/Rscript
+    sudo ln /home/vagrant/R-3.5.1/bin/R /usr/local/bin/R
+    sudo ln /home/vagrant/R-3.5.1/bin/Rscript /usr/local/bin/Rscript
 fi
 
 
